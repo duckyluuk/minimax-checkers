@@ -4,7 +4,7 @@ This program can play checkers against a human player, using the minimax algorit
 
 ## Playing the game
 
-- run the python file. 
+- run the python file Make sure you have the [pygame](https://www.pygame.org/) library installed. 
 - When it is your turn, select one of your pieces by clicking it.
 - After selecting a piece, click a tile to move this piece to.
 - Only valid moves will be executed, if a move is invalid nothing will happen.
