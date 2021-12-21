@@ -1,3 +1,4 @@
+# Import stuff
 import math
 from math import inf as infinity
 import pygame
@@ -7,11 +8,11 @@ PLAYER = -1
 COMPUTER = 1
 
 # Game Configuration
+aheadMoves = 6 # Maximum moves the bot thinks ahead
 bigBoard = True # 8x8 or 10x10 board
-aheadMoves = 5 # Maximum moves the bot thinks ahead
 hitBackwards = True # Whether normal pieces can hit backwards or not
 startTurn = PLAYER # Define who starts the game
-OPKing = True # Draughts king or Checkers king
+farJumpKing = True # Define whether the king can jump infinite tiles or not.
 
 # Define python screen
 pygame.init()
@@ -225,7 +226,7 @@ def moveListPiece(board, turn, pX, pY):
 
     # Check if the piece is a king
     isKing = board[pY][pX] == 2*turn;
-    if not OPKing or not isKing:
+    if not farJumpKing or not isKing:
          
          # Normal moves
          if validMove(board, pX, pY, pX+1, pY+turn):
