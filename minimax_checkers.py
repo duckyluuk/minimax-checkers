@@ -1,7 +1,7 @@
-# Import stuff
+# Import external libraries
+import pygame
 import math
 from math import inf as infinity
-import pygame
 from copy import deepcopy
 
 PLAYER = -1
@@ -23,10 +23,15 @@ screenHeight = 800
 size = (screenWidth, screenHeight)
 screen = pygame.display.set_mode(size)
 
+# stores the last made move, for rendering purposes
+lastMove = False
+lastHitPieces = False
+
 # Color variables
 WHITE = (255,255,255)
-LIGHTGRAY = (200, 200, 200)
-DARKGRAY = (50, 50, 50)
+GRAY = (75,75,75)
+HIGHLIGHTYELLOW = (150,150,50)
+HIGHLIGHTRED = (150, 50, 50)
 BLACK = (0,0,0)
 YELLOW = (255,255,0)
 PLAYERCOLOR = (0,0,255)
@@ -67,13 +72,15 @@ def renderBoard(board, highlightX, highlightY):
         for i in range(len(board[0])):
             # Board pattern
             if i%2 and not j%2 or not i%2 and j%2: # Odd tiles are black
-                if i == highlightX and j == highlightY: color = DARKGRAY
+                if i == highlightX and j == highlightY: color = GRAY # Highlight clicked tiles
+                elif lastMove : # Highlight clicked tiles
+                    if i == lastMove[0] and j == lastMove[1]: color = HIGHLIGHTYELLOW # Highlight tiles from the last move
+                    elif i == lastMove[2] and j == lastMove[3]: color = HIGHLIGHTYELLOW # Highlight tiles from the last move
+                    else: color = BLACK;
                 else: color = BLACK;
             else: # Even tiles are white
-                if i == highlightX and j == highlightY: color = LIGHTGRAY
-                else: color = WHITE;
+                color = WHITE;
             pygame.draw.rect(screen, color, (i*width,j*height,width,height), 0);
-
             # Piece rendering
             if gameBoard[j][i] != 0:
                 if gameBoard[j][i] > 0: # Computer pieces are defined as 1 or 2
@@ -86,6 +93,13 @@ def renderBoard(board, highlightX, highlightY):
                 # If the piece is a king, draw a gold outline around it
                 if gameBoard[j][i] == 2 or gameBoard[j][i] == -2: 
                     pygame.draw.circle(screen, YELLOW, (int(i*width+0.5*width), int(j*height+0.5*height)), int(0.4*width), 5);
+    
+    # Highlight places where pieces were hit
+    if lastHitPieces:
+        # Loop through all pieces that were hit
+        for p in lastHitPieces:
+            # Highlight the square on the board
+            pygame.draw.rect(screen, HIGHLIGHTRED, (p[0]*width,p[1]*height,width,height), 0);        
     # Update screen
     pygame.display.flip();
 
@@ -292,6 +306,11 @@ def moveList(board, turn):
 
 # Turn of player
 def playerTurn(board):
+    # Import global variables for storing last move
+    global lastMove
+    global lastHitPieces
+
+
     # Get the list of valid moves
     validMoves, moveHits = moveList(board, PLAYER);
     startX = -1;
@@ -316,8 +335,10 @@ def playerTurn(board):
                 yCell = math.floor(pos[1]/height)
                 # If no tile is selected yet, select the clicked tile
                 if startX == -1 or startY == -1:
-                    startX = xCell
-                    startY = yCell
+                    # Only allow tiles that have a player piece to be selected
+                    if board[yCell][xCell] == PLAYER:
+                        startX = xCell
+                        startY = yCell
                 # If the selected tile is clicked, unselect it
                 elif xCell == startX and yCell == startY:
                     startX = -1
@@ -344,6 +365,10 @@ def playerTurn(board):
     move = validMoves[index];
     hitPieces = moveHits[index];
     board = makeMove(board, move, hitPieces);
+    
+    lastMove = move
+    lastHitPieces = hitPieces
+
     # Draw the board
     renderBoard(board, -1, -1);
     print(boardString(board))
@@ -352,13 +377,20 @@ def playerTurn(board):
 
 # Turn of computer
 def computerTurn(board):
+    # Import global variables for storing last move
+    global lastMove
+    global lastHitPieces
+
     # Find the best move
     best = minimax(board, aheadMoves, COMPUTER, -infinity, infinity)
     move = best[0]
     hitPieces = best[1]
+    
 
     # Make the found move
     board = makeMove(board, move, hitPieces)
+    lastMove = move
+    lastHitPieces = hitPieces
 
     # Draw the board
     renderBoard(board, -1, -1);
@@ -472,4 +504,3 @@ if startTurn == PLAYER:
      playerTurn(gameBoard)
 else:
      computerTurn(gameBoard)
-
