@@ -336,7 +336,7 @@ def playerTurn(board):
                 # If no tile is selected yet, select the clicked tile
                 if startX == -1 or startY == -1:
                     # Only allow tiles that have a player piece to be selected
-                    if board[yCell][xCell] == PLAYER:
+                    if board[yCell][xCell] == PLAYER or board[yCell][xCell] == PLAYER*2:
                         startX = xCell
                         startY = yCell
                 # If the selected tile is clicked, unselect it
